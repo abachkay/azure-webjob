@@ -10,28 +10,13 @@ using System.Configuration;
 namespace azuredbtest1.Common
 {
     public class AzureTableAdapter
-    {
-        public static IEnumerable<BulkUpdateRequestTableEntity> GetStatus()
-        {
-            var table = tableClient.GetTableReference("BulkUpdateRequests");                        
-            var rangeQuery = new TableQuery<BulkUpdateRequestTableEntity>();
-            return table.ExecuteQuery(rangeQuery);
-        }
-
-        public static IEnumerable<T> GetAll<T>(string tableName)
-            where T : ITableEntity, new()
-        {
-            var table = tableClient.GetTableReference("BulkUpdateRequests");
-            var rangeQuery = new TableQuery<T>();
-            return table.ExecuteQuery(rangeQuery);
-        }
-
+    {              
         private static readonly CloudStorageAccount storageAccount = InitAccount();        
         private static readonly CloudTableClient tableClient = InitClient();
 
         private static CloudStorageAccount InitAccount()
         {
-            var sa = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);            
+            var sa = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
             var tableServicePoint = ServicePointManager.FindServicePoint(sa.TableEndpoint);
             tableServicePoint.UseNagleAlgorithm = false;
             return sa;

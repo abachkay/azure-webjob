@@ -16,8 +16,18 @@ namespace azuredbtest1.Common
        
         public string Status { get; set; }
 
-        public DateTime DateOfStart { get; set; }
+        public DateTime? DateOfStart { get; set; }
 
         public string Error { get; set; }
+
+        public string GolferId { get; set; }
+
+        public int? ClubId { get; set; }
+
+        public DateTime? DateOfRevision { get; set; }
+
+        public string Hi9HDisplayValue { get; set; }
+
+        public string Hi18HDisplayValue { get; set; }
     }
 }

@@ -1,24 +1,32 @@
-﻿using System;
-using System.Threading.Tasks;
-using azuredbtest1.Common;
-using Usga.Hcs.DataAccess.DataAccess;
+﻿using Microsoft.Azure.WebJobs;
+using System;
 
 namespace azuredbtest1
 {
     internal class Program
     {
-        static void Main()
+        private static void Main()
         {
-            var guid = SequentialGuidGenerator.NewSequentialId();
-            var request = new BulkUpdateRequestTableEntity()
-            {
-                PartitionKey = guid.ToString(),
-                RowKey = guid.ToString(),
-                Status = "Queued",
-                DateOfStart = DateTime.UtcNow
-            };
+            var config = new JobHostConfiguration();
+            config.Queues.MaxDequeueCount = 5;
+            config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(2);
+            config.Queues.BatchSize = 32;
 
-            Task.WaitAll(AzureTableAdapter.Upsert(request, "BulkUpdateRequests"));
+            var host = new JobHost(config);
+            host.RunAndBlock();
+
+            //var guid = SequentialGuidGenerator.NewSequentialId();
+            //var request = new BulkUpdateRequestTableEntity()
+            //{
+            //    PartitionKey = guid.ToString(),
+            //    RowKey = guid.ToString(),
+            //    Status = "Queued",
+            //    DateOfStart = DateTime.UtcNow
+            //};
+
+            //Task.WaitAll(AzureTableAdapter.Upsert(request, "BulkUpdateRequests"));
+
+            //Thread.Sleep(10000);
         }
     }
 }

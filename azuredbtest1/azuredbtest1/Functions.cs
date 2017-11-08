@@ -3,22 +3,33 @@ using Microsoft.Azure.WebJobs;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Usga.Hcs.DataAccess.DataAccess;
 
 namespace azuredbtest1
 {
     public class Functions
     {
-        public static async Task ProcessBulkUpdate(
-            [QueueTrigger("bulkupdaterequests")] Tuple<BulkUpdateRequestTableEntity, int[]> requestInfo)
+        [NoAutomaticTrigger]
+        public static async Task ProcessBulkUpdate(int[] clubIds)
         {
+            var request = new BulkUpdateRequestTableEntity();
             try
             {
-                var request = requestInfo.Item1;
+                var guid = SequentialGuidGenerator.NewSequentialId();
+                request = new BulkUpdateRequestTableEntity
+                {
+                    PartitionKey = guid.ToString(),
+                    RowKey = guid.ToString(),
+                    Status = "Inprogress",
+                    DateOfStart = DateTime.UtcNow
+                };
+
+                await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
 
                 #region TODO: Replace with real logic
 
                 const string golferId = "GolferId";
-                var specialUpdateRequests = requestInfo.Item2.Select(clubId => new BulkUpdateRequestTableEntity()
+                var specialUpdateRequests = clubIds.Select(clubId => new BulkUpdateRequestTableEntity
                     {
                         PartitionKey = request.PartitionKey,
                         RowKey = $"{request.PartitionKey}_{clubId}_{golferId}",
@@ -40,21 +51,11 @@ namespace azuredbtest1
                 await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
             }
             catch (Exception exception)
-            {
-                var request = requestInfo.Item1;
+            {              
                 request.Status = "Error";
                 request.Error = exception.Message;
                 await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
             }
         }
-
-        //public static async Task HandleBulkUpdateError(
-        //    [QueueTrigger("bulkupdaterequests-poison")] Tuple<BulkUpdateRequestTableEntity, int[]> requestInfo)
-        //{
-        //    var request = requestInfo.Item1;
-        //    request.Status = "Error";
-
-        //    await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
-        //}
     }
 }

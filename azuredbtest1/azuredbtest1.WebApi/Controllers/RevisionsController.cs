@@ -8,6 +8,9 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
@@ -39,37 +42,27 @@ namespace azuredbtest1.WebApi.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> Post([FromBody] int[] clubIds)
         {
-            var guid = SequentialGuidGenerator.NewSequentialId();
-            var request = new BulkUpdateRequestTableEntity
+            var client = new HttpClient()
             {
-                PartitionKey = guid.ToString(),
-                RowKey = guid.ToString(),
-                Status = "Inprogress",
-                DateOfStart = DateTime.UtcNow
+                BaseAddress = new Uri("https://azuredbtest2.scm.azurewebsites.net/api/")
             };
+            var byteArray =
+                Encoding.ASCII.GetBytes("$azuredbtest2:Sz4wgrHJd8ePpLxXSQqbuWHyEDqqMjvrEbGnul9XYmtQkvgCymFg5JQwQRk4");
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
-            await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
+            var stringBuilder = new StringBuilder();
 
-            var message = new CloudQueueMessage(JsonConvert.SerializeObject(new Tuple<BulkUpdateRequestTableEntity, int[]>(request, clubIds)));
-            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
-            var queueClient = storageAccount.CreateCloudQueueClient();
-            var queue = queueClient.GetQueueReference("bulkupdaterequests");
+            foreach (var clubId in clubIds)
+            {
+                stringBuilder.Append(clubId+" ");
+            }
 
-            queue.CreateIfNotExists();
-            await queue.AddMessageAsync(message);
+            var url = "triggeredwebjobs/azuredbtest1/run";//?arguments=" + stringBuilder;
 
-            return new OkNegotiatedContentResult<BulkUpdateRequestTableEntity>(request, this);
+            var response = await client.PostAsync(url, new ObjectContent(typeof(object),new{arguments=clubIds.Select(c => c.ToString()).ToArray()}, new JsonMediaTypeFormatter()));
 
-            //var client = new HttpClient()
-            //{
-            //    BaseAddress = new Uri("https://azuredbtest2.scm.azurewebsites.net/api/")
-            //};
-            //var byteArray =
-            //    Encoding.ASCII.GetBytes("$azuredbtest2:Sz4wgrHJd8ePpLxXSQqbuWHyEDqqMjvrEbGnul9XYmtQkvgCymFg5JQwQRk4");
-            //client.DefaultRequestHeaders.Authorization =
-            //    new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-            //var response = await client.PostAsync("triggeredwebjobs/azuredbtest1/run", null);
-            //return new ResponseMessageResult(response);
+            return new ResponseMessageResult(response);
         }
 
         [Route("{requestId}")]

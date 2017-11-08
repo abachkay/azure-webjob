@@ -1,19 +1,24 @@
 ﻿using Microsoft.Azure.WebJobs;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace azuredbtest1
 {
     internal class Program
     {
-        private static void Main()
+        private static void Main(string[] args)
         {
-            var config = new JobHostConfiguration();
-            config.Queues.MaxDequeueCount = 5;
-            config.Queues.MaxPollingInterval = TimeSpan.FromSeconds(2);
-            config.Queues.BatchSize = 32;
+            if (args == null || !args.Any())
+            {
+                args = new [] {"1"};
+            }
 
+            var config = new JobHostConfiguration();
+
+            var clubIds = args.Select(a => Convert.ToInt32(a)).ToArray();
             var host = new JobHost(config);
-            host.RunAndBlock();
+            Task.WaitAll( host.CallAsync(typeof(Functions).GetMethod("ProcessBulkUpdate"), new { clubIds }));
 
             //var guid = SequentialGuidGenerator.NewSequentialId();
             //var request = new BulkUpdateRequestTableEntity()

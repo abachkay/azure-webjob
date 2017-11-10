@@ -14,6 +14,8 @@ namespace azuredbtest1.Common
             RowKey = rowKey;
         }
        
+        public string ClubIds { get; set; }
+
         public string Status { get; set; }
 
         public DateTime? DateOfStart { get; set; }

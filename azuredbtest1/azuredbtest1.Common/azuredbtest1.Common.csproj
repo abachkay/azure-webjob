@@ -68,6 +68,7 @@
     <Compile Include="BulkUpdateRequest.cs" />
     <Compile Include="BulkUpdateRequestTableEntity.cs" />
     <Compile Include="BulkUpdateRequestTableEntityConverter.cs" />
+    <Compile Include="BulkUpdateStatus.cs" />
     <Compile Include="ITableEntityConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RevisionInfo.cs" />

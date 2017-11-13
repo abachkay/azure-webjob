@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Usga.Hcs.Common.Enums;
 
 namespace azuredbtest1.Common
 {
@@ -11,14 +12,14 @@ namespace azuredbtest1.Common
             var requestsTableEntities = arg.Where(a => a.PartitionKey == a.RowKey);
             if (requestsTableEntities.Count() != 1)
             {
-                throw new ArgumentException("Arg should have one request with PartitionKey equals RowKey");
+                throw new ArgumentException("Arumentg should have one request with PartitionKey equals RowKey");
             }
             var requestsTableEntity = requestsTableEntities.First();
             var data = arg.Where(a => a.PartitionKey != a.RowKey).Select(r => new BulkUpdateData()
             {
                 ClubId = r.ClubId.Value,
                 DateOfRevision = r.DateOfRevision.Value,
-                Success = r.Status == "Done",
+                Success = r.Status == BulkUpdateStatus.Done,
                 GolferId = r.GolferId,
                 Hi9hDisplayValue = r.Hi9HDisplayValue,
                 Hi18hDisplayValue = r.Hi18HDisplayValue,

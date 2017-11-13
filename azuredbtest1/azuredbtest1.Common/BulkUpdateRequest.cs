@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Usga.Hcs.Common.Enums;
 
 namespace azuredbtest1.Common
 {
@@ -11,7 +12,7 @@ namespace azuredbtest1.Common
         public Guid RequestId { get; set; }
 
         [DataMember(Name = "status")]
-        public string Status { get; set; }
+        public BulkUpdateStatus Status { get; set; }
 
         [DataMember(Name = "data")]
         public IEnumerable<BulkUpdateData> Data { get; set; }

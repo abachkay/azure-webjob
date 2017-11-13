@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.WindowsAzure.Storage.Table;
+using Usga.Hcs.Common.Enums;
 
 namespace azuredbtest1.Common
 {
@@ -13,11 +14,15 @@ namespace azuredbtest1.Common
             PartitionKey = partitionKey;
             RowKey = rowKey;
         }
-       
-        public string ClubIds { get; set; }
 
-        public string Status { get; set; }
+        public BulkUpdateStatus Status
+        {
+            get => (BulkUpdateStatus)StatusIntegerValue;
+            set => StatusIntegerValue = (int)value;
+        }
 
+        public int StatusIntegerValue { get; set; }
+        
         public DateTime? DateOfStart { get; set; }
 
         public string Error { get; set; }

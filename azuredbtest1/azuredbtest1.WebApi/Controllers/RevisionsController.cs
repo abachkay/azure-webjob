@@ -44,13 +44,13 @@ namespace azuredbtest1.WebApi.Controllers
             {
                 PartitionKey = guid.ToString(),
                 RowKey = guid.ToString(),
-                Status = "Inprogress",
+                Status = BulkUpdateStatus.Queued,
                 DateOfStart = DateTime.UtcNow
             };
 
             await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
 
-            var message = new CloudQueueMessage(JsonConvert.SerializeObject(new Tuple<BulkUpdateRequestTableEntity, int[]>(request, clubIds)));
+            var message = new CloudQueueMessage(guid.ToString());
             var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["StorageConnectionString"]);
             var queueClient = storageAccount.CreateCloudQueueClient();
             var queue = queueClient.GetQueueReference("bulkupdaterequests");

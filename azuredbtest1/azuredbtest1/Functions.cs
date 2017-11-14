@@ -1,7 +1,6 @@
 ﻿using azuredbtest1.Common;
 using Microsoft.Azure.WebJobs;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace azuredbtest1
@@ -9,52 +8,59 @@ namespace azuredbtest1
     public class Functions
     {
         public static async Task ProcessBulkUpdate(
-            [QueueTrigger("bulkupdaterequests")] Tuple<BulkUpdateRequestTableEntity, int[]> requestInfo)
+            [QueueTrigger("bulkupdaterequests")] Guid jobId)
         {
+            var request = await
+                AzureTableAdapter.GetByRowKeyAndPartKey<BulkUpdateRequestTableEntity>("BulkUpdateRequests", jobId.ToString(), jobId.ToString());
             try
             {
-                var request = requestInfo.Item1;
+                request.DateOfStart = DateTime.UtcNow;
+                request.Status = BulkUpdateStatus.InProgress;
 
-                #region TODO: Replace with real logic
+                await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
 
-                const string golferId = "GolferId";
-                var specialUpdateRequests = requestInfo.Item2.Select(clubId => new BulkUpdateRequestTableEntity()
+                var rand = new Random();
+                var requestData = new List<BulkUpdateRequestTableEntity>();
+
+                for (var i = 0; i < 5; i++)
+                {
+                    var golferId = $"a{rand.Next(1, 10000)}";
+                    var data = new BulkUpdateData
                     {
-                        PartitionKey = request.PartitionKey,
-                        RowKey = $"{request.PartitionKey}_{clubId}_{golferId}",
-                        ClubId = clubId,
                         GolferId = golferId,
-                        DateOfRevision = DateTime.UtcNow,
-                        Hi9HDisplayValue = "5",
-                        Hi18HDisplayValue = "10"
-                    })
-                    .ToList();
-                await Task.Delay(5000);
+                        ClubId = clubId
+                    };
 
-                #endregion
+                    requestData.Add(data);
+                }
+
+                request.Data = requestData;
+
+                var specialUpdateRequests = results.Select(r => new BulkUpdateRequestTableEntity
+                {
+                    PartitionKey = r.PartitionKey,
+                    RowKey = r.RowKey,
+                    ClubId = r.ClubId,
+                    GolferId = r.GolferId,
+                    DateOfRevision = DateTime.UtcNow,
+                    Hi9HDisplayValue = "5",
+                    Hi18HDisplayValue = "10",
+                    Status = BulkUpdateStatus.Done
+                }).ToList();
+                await Task.Delay(3000);
+
 
                 await AzureTableAdapter.UpsertMany(specialUpdateRequests, "BulkUpdateRequests");
 
-                request.Status = "Done";
-                //throw new Exception("abc");
+                request.Status = BulkUpdateStatus.Done;
                 await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
             }
             catch (Exception exception)
             {
-                var request = requestInfo.Item1;
-                request.Status = "Error";
+                request.Status = BulkUpdateStatus.Error;
                 request.Error = exception.Message;
                 await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
-            }
-        }
-
-        //public static async Task HandleBulkUpdateError(
-        //    [QueueTrigger("bulkupdaterequests-poison")] Tuple<BulkUpdateRequestTableEntity, int[]> requestInfo)
-        //{
-        //    var request = requestInfo.Item1;
-        //    request.Status = "Error";
-
-        //    await AzureTableAdapter.Upsert(request, "BulkUpdateRequests");
-        //}
+            }          
+        }      
     }
 }

@@ -109,6 +109,7 @@
     <None Include="Properties\PublishProfiles\azuredbtest - Web Deploy %283%29.pubxml" />
     <None Include="Properties\PublishProfiles\azuredbtest - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\azuredbtest2 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\azuredbtestcontinuous - Web Deploy.pubxml" />
     <None Include="Properties\webjob-publish-settings.json" />
   </ItemGroup>
   <ItemGroup>

@@ -5,12 +5,12 @@ using azuredbtest1.Common;
 
 namespace Usga.Hcs.Common.Model
 {
-    public class BulkUpdateRequestTableEntity : TableEntity
+    public class BulkUpdateDataTableEntity : TableEntity
     {
-        public BulkUpdateRequestTableEntity()
+        public BulkUpdateDataTableEntity()
         {
         }
-        public BulkUpdateRequestTableEntity(string partitionKey, string rowKey)
+        public BulkUpdateDataTableEntity(string partitionKey, string rowKey)
         {
             PartitionKey = partitionKey;
             RowKey = rowKey;
@@ -32,10 +32,16 @@ namespace Usga.Hcs.Common.Model
 
         public int? StatusIntegerValue { get; set; }
 
-        public DateTime? DateOfStart { get; set; }
+        public string Error { get; set; }       
 
-        public string Error { get; set; }
+        public string GolferId { get; set; }
 
-        public string ClubIdsString { get; set; }      
+        public int? ClubId { get; set; }
+
+        public DateTime? DateOfRevision { get; set; }
+
+        public string Hi9HDisplayValue { get; set; }
+
+        public string Hi18HDisplayValue { get; set; }
     }
 }

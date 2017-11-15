@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureTableAdapter.cs" />
+    <Compile Include="BulkUpdateData.cs" />
+    <Compile Include="BulkUpdateDataTableEntity.cs" />
+    <Compile Include="BulkUpdateRequest.cs" />
     <Compile Include="BulkUpdateRequestTableEntity.cs" />
     <Compile Include="BulkUpdateStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
